@@ -72,7 +72,7 @@ def create_availability_table(doc: docx.Document, mode: str, list_title: str, ta
 
 
 def availability_table_document(db: Database, mode: str, list_title: str):
-    doc = Document("utils/misc/template.docx")
+    doc = Document("utils/documents/template.docx")
     style = doc.styles["Normal"]
     style.paragraph_format.space_after = Pt(0)
     style_font = style.font
@@ -90,7 +90,7 @@ def availability_table_document(db: Database, mode: str, list_title: str):
 
 
 def availability_tables_document(db: Database, mode: str):
-    doc = Document("utils/misc/template.docx")
+    doc = Document("utils/documents/template.docx")
     style = doc.styles["Normal"]
     style.paragraph_format.space_after = Pt(0)
     style_font = style.font

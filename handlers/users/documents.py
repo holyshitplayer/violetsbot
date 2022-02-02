@@ -4,15 +4,15 @@ from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.types import CallbackQuery, ReplyKeyboardMarkup, KeyboardButton
 
-from keyboards.default import main_keyboard
+from keyboards.default import main_keyboard, cancel_keyboard
 from keyboards.inline import choose_document_keyboard, choose_table_to_export_list_keyboard, \
     choose_list_to_export_keyboard, choose_list_to_availability_table_keyboard
 from keyboards.inline.callback_datas import choose_table_to_export_list, choose_list_to_export, \
     choose_mode_availability_tables, choose_list_availability_tables
 from loader import dp, db, bot
-from utils.misc.create_availability_lists import create_availability_lists
-from utils.misc.create_availability_tables import availability_tables_document, availability_table_document
-from utils.misc.export_list_to_docx import export_list_to_docx
+from utils.documents.availability_lists import availability_lists_document
+from utils.documents.availability_tables import availability_tables_document, availability_table_document
+from utils.documents.list_to_docx import export_list_to_docx
 
 
 @dp.message_handler(text="📄 Создать документ")
@@ -44,7 +44,6 @@ async def list_to_docx(call: CallbackQuery, callback_data: dict):
 
 @dp.callback_query_handler(text="availability_lists")
 async def availability_lists(call: CallbackQuery, state: FSMContext):
-    cancel_keyboard = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text="❌ Отменить")]], resize_keyboard=True)
     await call.message.edit_text("Списки наличия по n+ шт. и по 1 шт")
     await bot.send_message(call.message.chat.id, "Введите количество <b>n</b>, по которому сформировать список наличия", reply_markup=cancel_keyboard)
     await state.set_state("availability_number")
@@ -64,13 +63,15 @@ async def availability_lists(message: types.Message, state: FSMContext):
             await message.answer("Введённое значение слишком большое, попробуйте поменьше")
         else:
             await message.answer("Списки наличия создаются, подождите")
-            create_availability_lists(db, n)
+            availability_lists_document(db, n)
             with open("data/files/availability_n.txt", "rb") as a_n, open("data/files/availability_1.txt", "rb") as a_1:
                 docs = types.MediaGroup()
                 docs.attach_document(a_n)
                 docs.attach_document(a_1)
                 await message.answer(f"Списки наличии по {n}+ шт. и по 1 шт.")
                 await message.answer_media_group(docs)
+                os.remove("data/files/availability_n.txt")
+                os.remove("data/files/availability_1.txt")
             await message.answer("Сделать что нибудь ещё? ✨", reply_markup=main_keyboard)
             await state.finish()
     except ValueError:
@@ -91,6 +92,7 @@ async def availability_tables(call: CallbackQuery, callback_data: dict):
     await call.message.edit_text(f"Ваш файл <b>{os.path.basename(docx_path)}</b> готов!")
     with open(docx_path, "rb") as doc:
         await call.message.answer_document(doc)
+        os.remove(docx_path)
 
 
 @dp.callback_query_handler(choose_list_availability_tables.filter())
@@ -102,3 +104,4 @@ async def availability_tables(call: CallbackQuery, callback_data: dict):
     await call.message.edit_text(f"Ваш файл <b>{os.path.basename(docx_path)}</b> готов!")
     with open(docx_path, "rb") as doc:
         await call.message.answer_document(doc)
+        os.remove(docx_path)

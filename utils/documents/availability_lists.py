@@ -1,7 +1,7 @@
 from utils.db_api import Database
 
 
-def create_availability_lists(db: Database, n: int):
+def availability_lists_document(db: Database, n: int):
     with open("data/files/availability_n.txt", "w", encoding="utf-8") as a_n, open("data/files/availability_1.txt", "w", encoding="utf-8") as a_1:
         sorts = db.select_filtered_sorts()
         for sort in sorts:

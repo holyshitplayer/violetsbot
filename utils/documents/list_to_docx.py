@@ -5,7 +5,7 @@ from utils.db_api import Database
 
 
 def export_list_to_docx(db: Database, table_name: str, list_title: str):
-    doc = Document("utils/misc/template.docx")
+    doc = Document("utils/documents/template.docx")
     style = doc.styles["Normal"]
     style.paragraph_format.space_after = Pt(3)
     style.font.name = "Proxima Nova Rg"
